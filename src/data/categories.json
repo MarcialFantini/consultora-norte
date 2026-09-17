@@ -1,0 +1,32 @@
+[
+  {
+    "slug": "estrategia",
+    "name": "Estrategia",
+    "description": "Decisiones de fondo para PyMEs que crecen: focalización, propuesta de valor, expansión.",
+    "tone": "deep-ink"
+  },
+  {
+    "slug": "operaciones",
+    "name": "Operaciones",
+    "description": "Procesos, planta, logística y productividad. Lo que toca transformar para bajar costos sin perder calidad.",
+    "tone": "terracotta"
+  },
+  {
+    "slug": "finanzas",
+    "name": "Finanzas",
+    "description": "Costos, flujo de caja, precios y tableros de gestión. Para entender los números sin vivir pendiente del banco.",
+    "tone": "graphite"
+  },
+  {
+    "slug": "rr-hh",
+    "name": "RR.HH.",
+    "description": "Equipos de planta, mandos medios, capacitación y retención. La gestión de personas en plantas industriales.",
+    "tone": "olive"
+  },
+  {
+    "slug": "casos",
+    "name": "Casos",
+    "description": "Trabajos reales con clientes. Lo que encontramos, lo que hicimos y qué cambió.",
+    "tone": "deep-ink"
+  }
+]

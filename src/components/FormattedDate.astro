@@ -1,0 +1,29 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  date: Date;
+  format?: 'long' | 'short' | 'iso';
+  class?: string;
+}
+
+const { date, format = 'long', class: className } = Astro.props;
+
+const longDate = date.toLocaleDateString('es-AR', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+
+const shortDate = date.toLocaleDateString('es-AR', {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+});
+
+const iso = date.toISOString().slice(0, 10);
+
+const display = format === 'short' ? shortDate : longDate;
+---
+
+<time datetime={iso} class={className}>{display}</time>

@@ -1,0 +1,72 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import CategoryChip from '../../components/CategoryChip.astro';
+import categories from '../../data/categories.json';
+
+const PAGE_SIZE = 6;
+const allPosts = (await getCollection('blog')).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+const posts = allPosts.slice(0, PAGE_SIZE);
+const total = allPosts.length;
+const hasNextPage = total > PAGE_SIZE;
+---
+<BaseLayout
+  title="Blog"
+  description="Artículos sobre estrategia, operaciones, finanzas y equipos para PyMEs industriales. Notas cortas con ejemplos concretos."
+>
+  <section class="mx-auto max-w-[1320px] px-5 pt-12 pb-10 lg:px-10 lg:pt-20">
+    <p class="font-display text-[11px] uppercase tracking-[0.22em] text-[var(--color-accent)]">
+      Archivo editorial
+    </p>
+    <h1 class="mt-4 max-w-3xl font-display text-4xl font-medium leading-[1.04] tracking-tight sm:text-5xl lg:text-6xl">
+      Todo lo que <em class="font-serif italic text-[var(--color-accent)]">publicamos</em>, en orden.
+    </h1>
+    <p class="mt-5 max-w-2xl text-lg text-[var(--color-ink-soft)]">
+      {total} notas sobre estrategia, operaciones, finanzas y gestión de personas en PyMEs industriales.
+    </p>
+  </section>
+
+  <section class="mx-auto max-w-[1320px] px-5 pb-8 lg:px-10" aria-label="Filtros por categoría">
+    <div class="flex flex-wrap items-center gap-2 border-y border-[var(--color-line)] py-4">
+      <span class="font-display text-[11px] uppercase tracking-[0.18em] text-[var(--color-mute)]">Filtrar:</span>
+      <a href="/blog/" class="pill-outline" aria-label="Quitar filtro">Todas</a>
+      {categories.map((c) => (
+        <a href={`/blog/category/${c.slug}/`} class="pill-outline hover:bg-[var(--color-ink)] hover:text-[var(--color-paper)] transition-colors">
+          {c.name}
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-[1320px] px-5 pb-24 lg:px-10" aria-label="Listado de artículos">
+    {posts.length === 0 ? (
+      <p class="rounded-[var(--radius-card)] border border-dashed border-[var(--color-line)] p-12 text-center text-[var(--color-mute)]">
+        Próximamente publicamos el primer artículo.
+      </p>
+    ) : (
+      <>
+        <ul class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {posts.map((post) => (
+            <li>
+              <PostCard post={post} />
+            </li>
+          ))}
+        </ul>
+
+        <nav class="mt-12 flex items-center justify-between gap-4 border-t border-[var(--color-line)] pt-6" aria-label="Paginación">
+          <span class="font-display text-[11px] uppercase tracking-[0.18em] text-[var(--color-mute)]">
+            Página 1 de 2
+          </span>
+          {hasNextPage && (
+            <a href="/blog/page/2/" class="btn-ghost">
+              Página siguiente →
+            </a>
+          )}
+        </nav>
+      </>
+    )}
+  </section>
+</BaseLayout>

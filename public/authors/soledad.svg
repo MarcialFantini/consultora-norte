@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Soledad Rivas">
+  <rect width="200" height="200" fill="#3F5240"/>
+  <circle cx="100" cy="100" r="80" fill="none" stroke="#FBF7F0" stroke-width="1" opacity="0.22"/>
+  <circle cx="100" cy="100" r="58" fill="none" stroke="#FBF7F0" stroke-width="1" opacity="0.4"/>
+  <text x="100" y="118" text-anchor="middle" font-family="Georgia, serif" font-size="62" font-style="italic" fill="#FBF7F0">SR</text>
+</svg>

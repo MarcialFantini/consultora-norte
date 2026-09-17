@@ -1,0 +1,23 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props {
+  category: string;
+  href?: string;
+  size?: 'sm' | 'md';
+  class?: string;
+  'aria-label'?: string;
+}
+
+const { category, href, size = 'md', class: className, ...rest } = Astro.props as Props & HTMLAttributes<'a'>;
+const slug = category.toLowerCase().replace(/\./g, '').replace(/\s+/g, '-');
+const baseClass = `inline-flex items-center gap-1.5 font-display font-medium uppercase tracking-[0.16em] ${
+  size === 'sm' ? 'text-[10px] px-2.5 py-1' : 'text-[11px] px-3 py-1.5'
+} border border-[var(--color-ink)] text-[var(--color-ink)] rounded-full`;
+const cls = `${baseClass} ${className ?? ''}`.trim();
+const target = href ?? `/blog/category/${slug}/`;
+---
+<a href={target} class={cls} aria-label={`Categoría ${category}`} {...rest}>
+  <span class="size-1.5 rounded-full bg-[var(--color-accent)]" aria-hidden="true"></span>
+  {category}
+</a>

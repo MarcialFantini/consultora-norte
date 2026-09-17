@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="Imagen OG por defecto — Consultora Norte">
+  <defs>
+    <linearGradient id="og-bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#FBF7F0"/>
+      <stop offset="100%" stop-color="#F1EADB"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#og-bg)"/>
+  <g fill="none" stroke="#15171A" stroke-width="1" opacity="0.15">
+    <line x1="0" y1="170" x2="1200" y2="170"/>
+    <line x1="0" y1="460" x2="1200" y2="460"/>
+    <line x1="220" y1="0" x2="220" y2="630"/>
+    <line x1="980" y1="0" x2="980" y2="630"/>
+  </g>
+  <g fill="none" stroke="#15171A" stroke-width="1.6" opacity="0.6">
+    <circle cx="900" cy="320" r="200"/>
+    <circle cx="900" cy="320" r="140"/>
+    <circle cx="900" cy="320" r="80"/>
+  </g>
+  <circle cx="900" cy="320" r="10" fill="#A8421F"/>
+  <g font-family="Georgia, serif" fill="#15171A">
+    <text x="80" y="170" font-size="28" letter-spacing="6" opacity="0.55" font-family="ui-sans-serif, system-ui">CONSULTORA NORTE</text>
+    <text x="80" y="380" font-size="92" font-style="italic">Blog</text>
+    <text x="80" y="460" font-size="32" opacity="0.78">Guía práctica para PyMEs industriales.</text>
+  </g>
+  <line x1="80" y1="500" x2="280" y2="500" stroke="#A8421F" stroke-width="3"/>
+</svg>

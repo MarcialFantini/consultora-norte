@@ -1,0 +1,94 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import site from '../data/site.json';
+---
+<BaseLayout title="Contacto" description="Cómo escribirle a Consultora Norte. Correo, agenda y redes.">
+  <section class="mx-auto max-w-[760px] px-5 pt-12 pb-12 lg:px-0 lg:pt-20">
+    <p class="font-display text-[11px] uppercase tracking-[0.22em] text-[var(--color-accent)]">
+      Contacto
+    </p>
+    <h1 class="mt-4 font-display text-5xl font-medium leading-[1.02] tracking-tight lg:text-7xl">
+      Escribinos <em class="font-serif italic text-[var(--color-accent)]">sin compromiso</em>.
+    </h1>
+    <p class="mt-5 text-lg leading-relaxed text-[var(--color-ink-soft)]">
+      Si tenés una pregunta específica sobre una nota, o querés conversar un caso antes de publicarlo, mandanos un correo. Respondemos en uno o dos días hábiles.
+    </p>
+  </section>
+
+  <section class="mx-auto max-w-[760px] px-5 pb-12 lg:px-0" aria-labelledby="contact-form-heading">
+    <div class="rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6 shadow-[var(--shadow-paper)] lg:p-10">
+      <h2 id="contact-form-heading" class="font-display text-2xl font-medium tracking-tight">
+        Formulario de contacto
+      </h2>
+      <p class="mt-2 text-sm text-[var(--color-mute)]">
+        Esta es una demo: el formulario no envía todavía. En la versión productiva se conecta a una API.
+      </p>
+      <form id="contact-form" class="mt-6 grid gap-5" novalidate>
+        <div class="grid gap-2">
+          <label for="contact-name" class="font-display text-[11px] uppercase tracking-[0.18em] text-[var(--color-ink)]">Nombre</label>
+          <input id="contact-name" name="name" type="text" required autocomplete="name" class="ed-input" />
+        </div>
+        <div class="grid gap-2">
+          <label for="contact-email" class="font-display text-[11px] uppercase tracking-[0.18em] text-[var(--color-ink)]">Correo</label>
+          <input id="contact-email" name="email" type="email" required autocomplete="email" class="ed-input" />
+        </div>
+        <div class="grid gap-2">
+          <label for="contact-msg" class="font-display text-[11px] uppercase tracking-[0.18em] text-[var(--color-ink)]">Mensaje</label>
+          <textarea id="contact-msg" name="message" required rows="6" class="ed-input rounded-[var(--radius-soft)] !py-3 resize-y"></textarea>
+        </div>
+        <button type="submit" class="btn-primary justify-self-start">Enviar mensaje</button>
+        <p id="contact-status" role="status" aria-live="polite" class="sr-only"></p>
+      </form>
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-[760px] px-5 pb-24 lg:px-0">
+    <h2 class="font-display text-xl font-medium tracking-tight">Otras vías</h2>
+    <ul class="mt-4 grid gap-3 text-sm">
+      <li class="flex items-start justify-between gap-3 rounded-[var(--radius-soft)] border border-[var(--color-line)] bg-white p-4">
+        <span>
+          <span class="block font-display text-[11px] uppercase tracking-[0.18em] text-[var(--color-mute)]">Correo</span>
+          <a href={`mailto:${site.social.email}`} class="font-display text-base text-[var(--color-ink)] hover:text-[var(--color-accent)] ink-link">
+            {site.social.email}
+          </a>
+        </span>
+        <span class="font-mono text-xs text-[var(--color-mute)]">1–2 días hábiles</span>
+      </li>
+      <li class="flex items-start justify-between gap-3 rounded-[var(--radius-soft)] border border-[var(--color-line)] bg-white p-4">
+        <span>
+          <span class="block font-display text-[11px] uppercase tracking-[0.18em] text-[var(--color-mute)]">LinkedIn</span>
+          <a href={site.social.linkedin} class="font-display text-base text-[var(--color-ink)] hover:text-[var(--color-accent)] ink-link">/company/consultora-norte</a>
+        </span>
+        <span class="font-mono text-xs text-[var(--color-mute)]">DM abierto</span>
+      </li>
+      <li class="flex items-start justify-between gap-3 rounded-[var(--radius-soft)] border border-[var(--color-line)] bg-white p-4">
+        <span>
+          <span class="block font-display text-[11px] uppercase tracking-[0.18em] text-[var(--color-mute)]">RSS</span>
+          <a href="/rss.xml" class="font-display text-base text-[var(--color-ink)] hover:text-[var(--color-accent)] ink-link">/rss.xml</a>
+        </span>
+        <span class="font-mono text-xs text-[var(--color-mute)]">Cero ruido</span>
+      </li>
+    </ul>
+  </section>
+</BaseLayout>
+
+<script is:inline>
+  (function () {
+    var form = document.getElementById('contact-form');
+    if (!form) return;
+    var status = document.getElementById('contact-status');
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      var name = (document.getElementById('contact-name')||{}).value || '';
+      var email = (document.getElementById('contact-email')||{}).value || '';
+      var msg = (document.getElementById('contact-msg')||{}).value || '';
+      var ok = name.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && msg.trim();
+      if (!ok) {
+        if (status) status.textContent = 'Completá nombre, correo y mensaje.';
+        return;
+      }
+      if (status) status.textContent = 'Mensaje enviado (simulado). Gracias por escribirnos.';
+      form.reset();
+    });
+  })();
+</script>

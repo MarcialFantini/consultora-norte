@@ -1,0 +1,71 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import FormattedDate from './FormattedDate.astro';
+import CategoryChip from './CategoryChip.astro';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+  variant?: 'default' | 'feature' | 'compact';
+  index?: number;
+}
+
+const { post, variant = 'default', index = 0 } = Astro.props;
+const { data, id } = post;
+const href = `/blog/${id}/`;
+
+const toneClass =
+  variant === 'feature'
+    ? 'lg:col-span-2 lg:row-span-2'
+    : '';
+---
+<article
+  class={`group relative flex flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white shadow-[var(--shadow-paper)] transition-transform duration-[600ms] [transition-timing-function:var(--ease-editorial)] hover:-translate-y-0.5 ${toneClass}`}
+>
+  <a href={href} class="absolute inset-0 z-10" aria-label={`Leer: ${data.title}`}></a>
+
+  <div class={`relative overflow-hidden bg-[var(--color-paper-deep)] ${
+    variant === 'feature' ? 'aspect-[16/9] lg:aspect-[5/3]' : 'aspect-[16/10]'
+  }`}>
+    {data.heroImage ? (
+      <img
+        src={data.heroImage}
+        alt={data.heroAlt}
+        loading={variant === 'feature' ? 'eager' : 'lazy'}
+        decoding="async"
+        class="size-full object-cover transition-transform duration-[800ms] [transition-timing-function:var(--ease-editorial)] group-hover:scale-[1.02]"
+      />
+    ) : (
+      <div class="flex size-full items-center justify-center font-display text-sm uppercase tracking-[0.2em] text-[var(--color-mute)]">
+        Consultora Norte
+      </div>
+    )}
+    <div class="absolute top-3 left-3">
+      <CategoryChip category={data.category} class="bg-white/95 backdrop-blur-sm" />
+    </div>
+  </div>
+
+  <div class="flex flex-1 flex-col gap-3 p-6">
+    <div class="flex items-center gap-3 text-xs text-[var(--color-mute)] font-display">
+      <FormattedDate date={data.pubDate} class="font-mono text-[11px] uppercase tracking-widest" />
+      <span aria-hidden="true">·</span>
+      <span>{data.readingTime} min</span>
+    </div>
+    <h3 class={`font-display font-medium tracking-tight leading-[1.05] text-[var(--color-ink)] ${
+      variant === 'feature'
+        ? 'text-3xl lg:text-4xl'
+        : 'text-xl lg:text-2xl'
+    }`}>
+      {data.title}
+    </h3>
+    <p class={`text-[var(--color-ink-soft)] leading-relaxed ${
+      variant === 'feature' ? 'text-base lg:text-lg' : 'text-sm lg:text-base'
+    }`}>
+      {data.description}
+    </p>
+    <div class="mt-auto flex items-center gap-2 pt-3 font-display text-xs uppercase tracking-[0.16em] text-[var(--color-ink)]">
+      <span>{data.author}</span>
+      <span class="size-1 rounded-full bg-[var(--color-accent)]" aria-hidden="true"></span>
+      <span class="text-[var(--color-mute)] normal-case tracking-normal font-serif italic">{data.authorRole.replace(/^Socia? — /, '')}</span>
+    </div>
+  </div>
+</article>

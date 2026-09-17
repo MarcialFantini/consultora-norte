@@ -1,0 +1,145 @@
+---
+import { getCollection, render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
+import CategoryChip from '../../components/CategoryChip.astro';
+import PostCard from '../../components/PostCard.astro';
+
+export const getStaticPaths = (async () => {
+  const posts = await getCollection('blog');
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}) satisfies GetStaticPaths;
+
+const { post } = Astro.props;
+const { Content, headings } = await render(post);
+const { data, id } = post;
+
+const allPosts = (await getCollection('blog')).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+const related = allPosts
+  .filter((p) => p.id !== id && p.data.category === data.category)
+  .slice(0, 3);
+const fallbackRelated = related.length === 0
+  ? allPosts.filter((p) => p.id !== id).slice(0, 3)
+  : [];
+const relatedPosts = related.length > 0 ? related : fallbackRelated;
+
+const ogImage = data.ogImage ?? data.heroImage ?? '/og-default.svg';
+---
+
+<BaseLayout
+  title={data.title}
+  description={data.description}
+  image={ogImage}
+  type="article"
+  pubDate={data.pubDate}
+  author={data.author}
+  category={data.category}
+>
+  <article class="mx-auto max-w-[1320px] px-5 pt-10 pb-12 lg:px-10 lg:pt-16">
+    <nav class="mb-6 font-display text-[11px] uppercase tracking-[0.18em] text-[var(--color-mute)]" aria-label="Migas">
+      <a href="/" class="hover:text-[var(--color-ink)]">Inicio</a>
+      <span class="mx-2" aria-hidden="true">/</span>
+      <a href="/blog/" class="hover:text-[var(--color-ink)]">Blog</a>
+      <span class="mx-2" aria-hidden="true">/</span>
+      <CategoryChip category={data.category} size="sm" />
+    </nav>
+
+    <header class="grid gap-10 lg:grid-cols-[1fr_0.7fr] lg:items-end">
+      <div>
+        <h1 class="font-display text-[2.3rem] font-medium leading-[1.05] tracking-tight text-[var(--color-ink)] sm:text-5xl lg:text-[3.6rem]">
+          {data.title}
+        </h1>
+        <p class="mt-5 max-w-2xl text-lg leading-relaxed text-[var(--color-ink-soft)]">
+          {data.description}
+        </p>
+      </div>
+      <dl class="grid grid-cols-2 gap-x-6 gap-y-4 border-t border-[var(--color-line)] pt-6 text-sm lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+        <div>
+          <dt class="font-display text-[10px] uppercase tracking-[0.2em] text-[var(--color-mute)]">Publicado</dt>
+          <dd class="mt-1 font-display text-base text-[var(--color-ink)]">
+            <FormattedDate date={data.pubDate} />
+          </dd>
+        </div>
+        <div>
+          <dt class="font-display text-[10px] uppercase tracking-[0.2em] text-[var(--color-mute)]">Lectura</dt>
+          <dd class="mt-1 font-display text-base text-[var(--color-ink)]">{data.readingTime} min</dd>
+        </div>
+        <div class="col-span-2">
+          <dt class="font-display text-[10px] uppercase tracking-[0.2em] text-[var(--color-mute)]">Autor</dt>
+          <dd class="mt-1 flex flex-col">
+            <span class="font-display text-base text-[var(--color-ink)]">{data.author}</span>
+            <span class="text-xs text-[var(--color-mute)]">{data.authorRole}</span>
+          </dd>
+        </div>
+      </dl>
+    </header>
+
+    {data.heroImage && (
+      <figure class="mt-10 overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper-deep)] shadow-[var(--shadow-paper)]">
+        <img
+          src={data.heroImage}
+          alt={data.heroAlt}
+          width="1600"
+          height="900"
+          loading="eager"
+          decoding="async"
+          class="aspect-[16/9] w-full object-cover"
+        />
+        <figcaption class="sr-only">{data.heroAlt}</figcaption>
+      </figure>
+    )}
+  </article>
+
+  <section class="mx-auto max-w-[760px] px-5 pb-16 lg:pb-20">
+    <div class="prose prose-editorial max-w-none">
+      <Content />
+    </div>
+
+    {data.tags && data.tags.length > 0 && (
+      <ul class="mt-10 flex flex-wrap items-center gap-2 border-t border-[var(--color-line)] pt-6" aria-label="Tags">
+        <li class="font-display text-[11px] uppercase tracking-[0.18em] text-[var(--color-mute)]">Tags:</li>
+        {data.tags.map((tag: string) => (
+          <li class="rounded-full border border-[var(--color-line)] px-3 py-1 font-display text-[11px] uppercase tracking-[0.16em] text-[var(--color-ink-soft)]">
+            #{tag}
+          </li>
+        ))}
+      </ul>
+    )}
+
+    <div class="mt-12 flex flex-col gap-4 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper-deep)] p-6 lg:flex-row lg:items-center lg:justify-between">
+      <div>
+        <p class="font-display text-[11px] uppercase tracking-[0.18em] text-[var(--color-accent)]">Te gustó este artículo</p>
+        <p class="mt-1 font-display text-xl font-medium leading-tight">
+          Recibí una nota como esta cada mes.
+        </p>
+      </div>
+      <a href="/" class="btn-ghost">Suscribirme por RSS</a>
+    </div>
+  </section>
+
+  {relatedPosts.length > 0 && (
+    <section class="mx-auto max-w-[1320px] px-5 pb-24 lg:px-10" aria-labelledby="related-heading">
+      <header class="mb-6 flex items-end justify-between gap-4 border-t border-[var(--color-line)] pt-10">
+        <h2 id="related-heading" class="font-display text-2xl font-medium tracking-tight lg:text-3xl">
+          Para seguir leyendo
+        </h2>
+        <a href="/blog/" class="font-display text-sm uppercase tracking-[0.18em] text-[var(--color-ink)] ink-link">
+          Ver todos →
+        </a>
+      </header>
+      <ul class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {relatedPosts.map((p) => (
+          <li>
+            <PostCard post={p} />
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+</BaseLayout>

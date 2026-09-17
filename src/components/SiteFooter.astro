@@ -1,0 +1,107 @@
+---
+import site from '../data/site.json';
+import categories from '../data/categories.json';
+import CategoryNav from './CategoryNav.astro';
+---
+<footer class="mt-20 border-t border-[var(--color-line)] bg-[var(--color-ink)] text-[var(--color-paper)]">
+  <div class="mx-auto grid max-w-[1320px] gap-12 px-5 py-16 lg:grid-cols-[1.4fr_1fr_1fr] lg:px-10 lg:py-24">
+
+    <section aria-labelledby="footer-newsletter" class="flex flex-col gap-5">
+      <p class="font-display text-[11px] uppercase tracking-[0.22em] text-[var(--color-accent-soft)]">
+        Suscripción
+      </p>
+      <h2 id="footer-newsletter" class="font-display text-3xl font-medium leading-tight tracking-tight lg:text-4xl">
+        Recibí una nota por mes.
+        <span class="text-[var(--color-accent-soft)] italic font-serif">Cero ruido.</span>
+      </h2>
+      <p class="max-w-md text-[var(--color-paper-deep)] leading-relaxed">
+        Una sola nota mensual, con un artículo nuevo y un resumen corto de los otros. Te podés dar de baja cuando quieras.
+      </p>
+      <form
+        id="newsletter-form"
+        class="flex flex-col gap-3 sm:flex-row sm:gap-2"
+        novalidate
+      >
+        <label class="sr-only" for="newsletter-email">Tu correo electrónico</label>
+        <input
+          id="newsletter-email"
+          name="email"
+          type="email"
+          required
+          autocomplete="email"
+          placeholder="tu@empresa.com"
+          class="ed-input flex-1 !bg-transparent !text-[var(--color-paper)] !border-[var(--color-paper-deep)]/40 placeholder:!text-[var(--color-paper-deep)]/60"
+        />
+        <button type="submit" class="btn-primary !bg-[var(--color-accent)] hover:!bg-[var(--color-paper)] hover:!text-[var(--color-ink)]">
+          Suscribirme
+        </button>
+        <p
+          id="newsletter-status"
+          role="status"
+          aria-live="polite"
+          class="sr-only"
+        ></p>
+      </form>
+    </section>
+
+    <nav aria-label="Secciones" class="flex flex-col gap-3 font-display">
+      <p class="text-[11px] uppercase tracking-[0.22em] text-[var(--color-accent-soft)]">Secciones</p>
+      <ul class="flex flex-col gap-2 text-sm text-[var(--color-paper-deep)]">
+        <li><a href="/blog/" class="hover:text-white transition-colors">Todos los artículos</a></li>
+        {categories.map((c) => (
+          <li><a href={`/blog/category/${c.slug}/`} class="hover:text-white transition-colors">{c.name}</a></li>
+        ))}
+        <li><a href="/about/" class="hover:text-white transition-colors">Sobre la consultora</a></li>
+        <li><a href="/contact/" class="hover:text-white transition-colors">Contacto</a></li>
+      </ul>
+    </nav>
+
+    <section class="flex flex-col gap-3 font-display">
+      <p class="text-[11px] uppercase tracking-[0.22em] text-[var(--color-accent-soft)]">Contacto</p>
+      <p class="text-sm leading-relaxed text-[var(--color-paper-deep)]">
+        Córdoba, Argentina.<br />
+        Atendemos PyMEs de toda la región centro y CABA.
+      </p>
+      <a href={`mailto:${site.social.email}`} class="text-sm text-white underline-offset-4 hover:underline ink-link">
+        {site.social.email}
+      </a>
+      <ul class="mt-2 flex items-center gap-3 text-[11px] uppercase tracking-[0.18em]">
+        <li><a href={site.social.linkedin} class="text-[var(--color-paper-deep)] hover:text-white">LinkedIn</a></li>
+        <li aria-hidden="true" class="text-[var(--color-paper-deep)]/40">/</li>
+        <li><a href={site.social.twitter} class="text-[var(--color-paper-deep)] hover:text-white">Twitter</a></li>
+      </ul>
+      <p class="mt-3 text-[11px] tracking-[0.16em] uppercase text-[var(--color-paper-deep)]/60">
+        © {new Date().getFullYear()} {site.name}
+      </p>
+    </section>
+
+  </div>
+
+  <div class="border-t border-[var(--color-paper)]/10 bg-black/30">
+    <div class="mx-auto flex max-w-[1320px] flex-col items-start justify-between gap-2 px-5 py-5 text-[11px] tracking-[0.16em] uppercase text-[var(--color-paper-deep)]/70 lg:flex-row lg:items-center lg:px-10">
+      <span>Est. {site.established} · Tres socios · Una promesa editorial.</span>
+      <span>Sitio de muestra · Consultora Norte (ficticio)</span>
+    </div>
+  </div>
+</footer>
+
+<script is:inline>
+  (function () {
+    var form = document.getElementById('newsletter-form');
+    if (!form) return;
+    var status = document.getElementById('newsletter-status');
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      var input = document.getElementById('newsletter-email');
+      var email = input && input.value ? input.value.trim() : '';
+      var ok = email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      if (!ok) {
+        if (status) status.textContent = 'Ingresá un correo válido.';
+        if (input) input.focus();
+        return;
+      }
+      if (status) status.textContent = '¡Listo! Te suscribiste (simulado).';
+      form.reset();
+    });
+  })();
+</script>

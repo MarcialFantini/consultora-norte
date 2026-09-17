@@ -1,0 +1,51 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  type?: 'website' | 'article';
+  pubDate?: Date;
+  author?: string;
+  category?: string;
+}
+
+const siteData = (await import('../data/site.json')).default;
+const {
+  title,
+  description,
+  image = '/og-default.svg',
+  type = 'website',
+  pubDate,
+  author,
+  category,
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? siteData.url);
+const fullTitle = title ? `${title} — ${siteData.name}` : `${siteData.name} — ${siteData.tagline}`;
+const desc = description ?? siteData.description;
+const ogURL = new URL(image, Astro.site ?? siteData.url).toString();
+---
+<title>{fullTitle}</title>
+<meta name="description" content={desc} />
+<link rel="canonical" href={canonicalURL.toString()} />
+
+<meta property="og:type" content={type} />
+<meta property="og:title" content={title ?? siteData.name} />
+<meta property="og:description" content={desc} />
+<meta property="og:url" content={canonicalURL.toString()} />
+<meta property="og:image" content={ogURL} />
+<meta property="og:site_name" content={siteData.name} />
+<meta property="og:locale" content={siteData.locale} />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title ?? siteData.name} />
+<meta name="twitter:description" content={desc} />
+<meta name="twitter:image" content={ogURL} />
+
+{type === 'article' && pubDate && (
+  <meta property="article:published_time" content={pubDate.toISOString()} />
+)}
+{type === 'article' && author && <meta property="article:author" content={author} />}
+{type === 'article' && category && <meta property="article:section" content={category} />}
+
+<link rel="alternate" type="application/rss+xml" title={`${siteData.name} — RSS`} href="/rss.xml" />

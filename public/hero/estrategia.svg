@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="Editorial — líneas y órbitas sobre fondo crema">
+  <rect width="1600" height="900" fill="#FBF7F0"/>
+  <g stroke="#15171A" fill="none" stroke-width="1" opacity="0.12">
+    <line x1="0" y1="220" x2="1600" y2="220"/>
+    <line x1="0" y1="680" x2="1600" y2="680"/>
+    <line x1="280" y1="0" x2="280" y2="900"/>
+    <line x1="1320" y1="0" x2="1320" y2="900"/>
+  </g>
+  <g fill="none" stroke="#15171A" stroke-width="1.4" opacity="0.6">
+    <circle cx="1200" cy="460" r="280"/>
+    <circle cx="1200" cy="460" r="200"/>
+    <circle cx="1200" cy="460" r="120"/>
+  </g>
+  <circle cx="1200" cy="460" r="14" fill="#A8421F"/>
+  <g font-family="Georgia, serif" font-size="42" fill="#15171A" opacity="0.9">
+    <text x="120" y="500" font-style="italic">Estrategia</text>
+    <text x="120" y="560" font-size="22" opacity="0.7">foco · propuesta · expansión</text>
+  </g>
+  <line x1="120" y1="600" x2="380" y2="600" stroke="#A8421F" stroke-width="3"/>
+</svg>

@@ -1,0 +1,46 @@
+---
+import site from '../data/site.json';
+import CategoryNav from './CategoryNav.astro';
+
+const path = Astro.url.pathname;
+const isBlogSection = path.startsWith('/blog');
+---
+<header class="sticky top-0 z-40 backdrop-blur-md bg-[var(--color-paper)]/85 border-b border-[var(--color-line)]">
+  <div class="mx-auto flex max-w-[1320px] items-center justify-between gap-4 px-5 py-3 lg:px-10 lg:py-4">
+    <a href="/" class="group flex items-center gap-2.5" aria-label={`Inicio, ${site.name}`}>
+      <span class="grid size-9 place-items-center rounded-full bg-[var(--color-ink)] text-[var(--color-paper)]">
+        <span class="block size-3 rounded-full bg-[var(--color-accent)]" aria-hidden="true"></span>
+      </span>
+      <span class="flex flex-col leading-none">
+        <span class="font-display text-[15px] font-medium tracking-tight text-[var(--color-ink)]">
+          {site.name}
+        </span>
+        <span class="font-serif italic text-[11px] text-[var(--color-mute)]">Guías para PyMEs</span>
+      </span>
+    </a>
+
+    <CategoryNav class="hidden lg:flex" />
+
+    <div class="flex items-center gap-2">
+      <a
+        href="/rss.xml"
+        class="hidden md:inline-flex items-center gap-1.5 rounded-full border border-[var(--color-line)] px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.18em] text-[var(--color-ink)] hover:border-[var(--color-ink)] transition-colors"
+        aria-label="Suscribirse al RSS"
+      >
+        RSS
+      </a>
+      <a
+        href="/blog/"
+        class="btn-primary !py-2 !px-4 text-[13px]"
+      >
+        Leer
+      </a>
+    </div>
+  </div>
+
+  {isBlogSection && (
+    <div class="border-t border-[var(--color-line)] bg-[var(--color-paper)]/95 lg:hidden">
+      <CategoryNav class="flex w-full overflow-x-auto px-5 py-3" />
+    </div>
+  )}
+</header>

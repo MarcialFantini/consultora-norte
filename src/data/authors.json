@@ -1,0 +1,23 @@
+[
+  {
+    "slug": "lucia-fernandez",
+    "name": "Lucía Fernández",
+    "role": "Socia — Estrategia & Operaciones",
+    "bio": "Ingeniera industrial (UTN). 14 años acompañando PyMEs manufactureras en planes de eficiencia y rediseño de procesos.",
+    "avatar": "/authors/lucia.svg"
+  },
+  {
+    "slug": "martin-oviedo",
+    "name": "Martín Oviedo",
+    "role": "Socio — Finanzas & Control",
+    "bio": "Contador público (UNC). Especialista en costos industriales y tableros de gestión. Antes fue CFO en dos PyMEs familiares.",
+    "avatar": "/authors/martin.svg"
+  },
+  {
+    "slug": "soledad-rivas",
+    "name": "Soledad Rivas",
+    "role": "Socia — Personas & Cultura",
+    "bio": "Lic. en Recursos Humanos (UCC). Trabaja con equipos de planta en industria metalmecánica y alimenticia.",
+    "avatar": "/authors/soledad.svg"
+  }
+]

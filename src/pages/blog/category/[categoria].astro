@@ -1,0 +1,91 @@
+---
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PostCard from '../../../components/PostCard.astro';
+import CategoryChip from '../../../components/CategoryChip.astro';
+import categories from '../../../data/categories.json';
+
+export const getStaticPaths = (async () => {
+  return categories.map((c) => ({ params: { categoria: c.slug } }));
+}) satisfies GetStaticPaths;
+
+const { categoria } = Astro.params;
+const cat = categories.find((c) => c.slug === categoria);
+
+if (!cat) {
+  return Astro.redirect('/blog/');
+}
+
+const allPosts = (await getCollection('blog'))
+  .filter((post) => post.data.category === cat.name)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const relatedCategories = categories.filter((c) => c.slug !== categoria).slice(0, 4);
+---
+
+<BaseLayout
+  title={cat.name}
+  description={cat.description}
+>
+  <section class="mx-auto max-w-[1320px] px-5 pt-12 pb-10 lg:px-10 lg:pt-20">
+    <nav class="mb-6 font-display text-[11px] uppercase tracking-[0.18em] text-[var(--color-mute)]" aria-label="Migas">
+      <a href="/" class="hover:text-[var(--color-ink)]">Inicio</a>
+      <span class="mx-2" aria-hidden="true">/</span>
+      <a href="/blog/" class="hover:text-[var(--color-ink)]">Blog</a>
+      <span class="mx-2" aria-hidden="true">/</span>
+      <span class="text-[var(--color-ink)]">Categoría</span>
+    </nav>
+    <p class="font-display text-[11px] uppercase tracking-[0.22em] text-[var(--color-accent)]">
+      Categoría
+    </p>
+    <h1 class="mt-4 font-display text-5xl font-medium leading-[1.02] tracking-tight lg:text-7xl">
+      {cat.name}
+    </h1>
+    <p class="mt-5 max-w-2xl text-lg leading-relaxed text-[var(--color-ink-soft)]">
+      {cat.description}
+    </p>
+    <p class="mt-4 font-display text-xs uppercase tracking-[0.18em] text-[var(--color-mute)]">
+      {allPosts.length} {allPosts.length === 1 ? 'nota' : 'notas'} publicada{allPosts.length === 1 ? '' : 's'}
+    </p>
+  </section>
+
+  <section class="mx-auto max-w-[1320px] px-5 pb-16 lg:px-10">
+    {allPosts.length === 0 ? (
+      <div class="rounded-[var(--radius-card)] border border-dashed border-[var(--color-line)] p-12 text-center">
+        <p class="font-display text-lg text-[var(--color-ink)]">Próximamente publicamos notas en esta categoría.</p>
+        <p class="mt-2 text-sm text-[var(--color-mute)]">Mientras tanto, mirá el archivo completo.</p>
+        <a href="/blog/" class="mt-6 inline-flex btn-primary">Ver todos los artículos</a>
+      </div>
+    ) : (
+      <ul class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {allPosts.map((post) => (
+          <li>
+            <PostCard post={post} />
+          </li>
+        ))}
+      </ul>
+    )}
+  </section>
+
+  <section class="mx-auto max-w-[1320px] px-5 pb-24 lg:px-10" aria-labelledby="related-cats-heading">
+    <header class="mb-6 border-t border-[var(--color-line)] pt-10">
+      <h2 id="related-cats-heading" class="font-display text-2xl font-medium tracking-tight">
+        Otras categorías
+      </h2>
+    </header>
+    <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      {relatedCategories.map((c) => (
+        <li>
+          <a
+            href={`/blog/category/${c.slug}/`}
+            class="flex h-full items-center justify-between gap-3 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white px-5 py-4 transition-colors hover:border-[var(--color-ink)]"
+          >
+            <span class="font-display text-sm font-medium tracking-tight">{c.name}</span>
+            <span class="font-mono text-[11px] text-[var(--color-mute)]" aria-hidden="true">→</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+</BaseLayout>

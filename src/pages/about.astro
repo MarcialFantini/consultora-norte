@@ -1,0 +1,81 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import site from '../data/site.json';
+import authors from '../data/authors.json';
+---
+<BaseLayout title="Sobre la consultora" description="Tres socios, una promesa editorial. Cómo trabaja Consultora Norte con PyMEs industriales.">
+  <section class="mx-auto max-w-[760px] px-5 pt-12 pb-12 lg:px-0 lg:pt-20">
+    <p class="font-display text-[11px] uppercase tracking-[0.22em] text-[var(--color-accent)]">
+      Sobre nosotras
+    </p>
+    <h1 class="mt-4 font-display text-5xl font-medium leading-[1.02] tracking-tight lg:text-7xl">
+      Una <em class="font-serif italic text-[var(--color-accent)]">promesa editorial</em> para PyMEs industriales.
+    </h1>
+    <p class="mt-6 text-lg leading-relaxed text-[var(--color-ink-soft)]">
+      Consultora Norte trabaja desde {site.established} con PyMEs manufactureras y de servicios de la región centro de Argentina. Hacemos estrategia, operaciones, finanzas y gestión de personas. Y desde hace un tiempo, también escribimos.
+    </p>
+    <p class="mt-4 text-lg leading-relaxed text-[var(--color-ink-soft)]">
+      Este blog es una cara lateral de lo que hacemos cada semana: escribir lo que aprendimos, para que más gente pueda usarlo. No vendemos nada por acá — solo publicamos.
+    </p>
+  </section>
+
+  <section class="mx-auto max-w-[1320px] px-5 pb-12 lg:px-10" aria-labelledby="principles-heading">
+    <header class="mb-6 border-t border-[var(--color-line)] pt-10">
+      <h2 id="principles-heading" class="font-display text-2xl font-medium tracking-tight lg:text-3xl">
+        Tres principios
+      </h2>
+    </header>
+    <ul class="grid gap-4 lg:grid-cols-3">
+      <li class="rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6">
+        <span class="font-display text-3xl text-[var(--color-accent)]">01</span>
+        <h3 class="mt-2 font-display text-xl font-medium">Números antes que opiniones</h3>
+        <p class="mt-2 text-sm leading-relaxed text-[var(--color-ink-soft)]">
+          Si una afirmación no tiene un número que la respalde, la dejamos afuera o la marcamos como hipótesis.
+        </p>
+      </li>
+      <li class="rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6">
+        <span class="font-display text-3xl text-[var(--color-accent)]">02</span>
+        <h3 class="mt-2 font-display text-xl font-medium">Casos antes que teoría</h3>
+        <p class="mt-2 text-sm leading-relaxed text-[var(--color-ink-soft)]">
+          Preferimos publicar el caso anonimizado del cliente que aprendió algo, antes que un framework genérico.
+        </p>
+      </li>
+      <li class="rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6">
+        <span class="font-display text-3xl text-[var(--color-accent)]">03</span>
+        <h3 class="mt-2 font-display text-xl font-medium">Brevedad operativa</h3>
+        <p class="mt-2 text-sm leading-relaxed text-[var(--color-ink-soft)]">
+          Notas de 6 a 8 minutos. Una sola idea por artículo. Que se pueda leer entre una reunión y otra.
+        </p>
+      </li>
+    </ul>
+  </section>
+
+  <section class="mx-auto max-w-[1320px] px-5 pb-24 lg:px-10" aria-labelledby="team-heading">
+    <header class="mb-6 border-t border-[var(--color-line)] pt-10">
+      <h2 id="team-heading" class="font-display text-2xl font-medium tracking-tight lg:text-3xl">
+        Las socias
+      </h2>
+    </header>
+    <ul class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {authors.map((a) => (
+        <li class="rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6">
+          <div class="flex items-center gap-4">
+            <img
+              src={a.avatar}
+              alt={`Retrato de ${a.name}`}
+              width="56"
+              height="56"
+              loading="lazy"
+              class="size-14 rounded-full object-cover"
+            />
+            <div>
+              <p class="font-display text-base font-medium leading-tight">{a.name}</p>
+              <p class="font-display text-[11px] uppercase tracking-[0.16em] text-[var(--color-mute)]">{a.role}</p>
+            </div>
+          </div>
+          <p class="mt-4 text-sm leading-relaxed text-[var(--color-ink-soft)]">{a.bio}</p>
+        </li>
+      ))}
+    </ul>
+  </section>
+</BaseLayout>

@@ -1,0 +1,15 @@
+{
+  "name": "Consultora Norte",
+  "tagline": "Guía práctica para PyMEs industriales.",
+  "description": "Artículos sobre estrategia, operaciones, finanzas y gestión de equipos. Hecho por socios que trabajan codo a codo con dueños y gerentes de PyMEs.",
+  "url": "https://blog.consultoranorte.example",
+  "locale": "es-AR",
+  "established": 2014,
+  "partners": 3,
+  "location": "Córdoba, Argentina",
+  "social": {
+    "linkedin": "https://www.linkedin.com/company/consultora-norte",
+    "twitter": "https://twitter.com/consultoranorte",
+    "email": "consejo@consultoranorte.example"
+  }
+}

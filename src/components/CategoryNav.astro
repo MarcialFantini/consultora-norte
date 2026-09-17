@@ -1,0 +1,22 @@
+---
+import categories from '../data/categories.json';
+const { class: className = '' } = Astro.props;
+---
+<nav aria-label="Secciones principales" class={`flex items-center gap-1 ${className}`}>
+  <a href="/blog/" class="font-display text-sm tracking-tight text-[var(--color-ink)] hover:text-[var(--color-accent)] transition-colors">
+    Blog
+  </a>
+  <span class="text-[var(--color-line)]" aria-hidden="true">/</span>
+  <ul class="flex items-center gap-3 lg:gap-5">
+    {categories.map((c) => (
+      <li>
+        <a
+          href={`/blog/category/${c.slug}/`}
+          class="font-display text-sm tracking-tight text-[var(--color-ink)] hover:text-[var(--color-accent)] transition-colors"
+        >
+          {c.name}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>

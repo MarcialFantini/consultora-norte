@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="Editorial — tablero de barras y números sobre fondo crema">
+  <rect width="1600" height="900" fill="#FBF7F0"/>
+  <g fill="#15171A" opacity="0.85">
+    <rect x="180" y="560" width="110" height="200"/>
+    <rect x="330" y="430" width="110" height="330"/>
+    <rect x="480" y="520" width="110" height="240"/>
+    <rect x="630" y="300" width="110" height="460"/>
+    <rect x="780" y="380" width="110" height="380"/>
+    <rect x="930" y="200" width="110" height="560"/>
+  </g>
+  <rect x="180" y="760" width="860" height="3" fill="#A8421F"/>
+  <g font-family="ui-monospace, monospace" font-size="22" fill="#15171A" opacity="0.8">
+    <text x="180" y="800">$ 24k</text>
+    <text x="330" y="800">$ 31k</text>
+    <text x="480" y="800">$ 28k</text>
+    <text x="630" y="800">$ 44k</text>
+    <text x="780" y="800">$ 36k</text>
+    <text x="930" y="800">$ 56k</text>
+  </g>
+  <g font-family="Georgia, serif" font-size="42" fill="#15171A" opacity="0.9">
+    <text x="1180" y="320" font-style="italic">Finanzas</text>
+    <text x="1180" y="370" font-size="22" opacity="0.7">costos · caja · margen</text>
+    <line x1="1180" y1="400" x2="1400" y2="400" stroke="#A8421F" stroke-width="3"/>
+  </g>
+</svg>
