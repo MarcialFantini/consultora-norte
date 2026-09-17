@@ -21,13 +21,40 @@ const { data, id } = post;
 const allPosts = (await getCollection('blog')).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
 );
-const related = allPosts
-  .filter((p) => p.id !== id && p.data.category === data.category)
-  .slice(0, 3);
-const fallbackRelated = related.length === 0
-  ? allPosts.filter((p) => p.id !== id).slice(0, 3)
-  : [];
-const relatedPosts = related.length > 0 ? related : fallbackRelated;
+
+// Related-posts strategy: same category first, then editorial neighbors, then any.
+// The category map mirrors how the consulting partners group these notes when
+// recommending further reading to a client.
+const RELATED_CATEGORIES: Record<string, string[]> = {
+  'Estrategia': ['Operaciones', 'Casos'],
+  'Operaciones': ['Estrategia', 'Casos'],
+  'Finanzas': ['RR.HH.', 'Casos'],
+  'RR.HH.': ['Finanzas', 'Casos'],
+  'Casos': ['Estrategia', 'Operaciones', 'Finanzas', 'RR.HH.'],
+};
+
+const sameCategory = allPosts.filter(
+  (p) => p.id !== id && p.data.category === data.category
+);
+const relatedPool = [...sameCategory];
+const neighbors = RELATED_CATEGORIES[data.category] ?? [];
+for (const neighbor of neighbors) {
+  if (relatedPool.length >= 3) break;
+  const fillers = allPosts.filter(
+    (p) => p.id !== id && p.data.category === neighbor && !relatedPool.includes(p)
+  );
+  for (const f of fillers) {
+    if (relatedPool.length >= 3) break;
+    relatedPool.push(f);
+  }
+}
+if (relatedPool.length < 3) {
+  for (const p of allPosts) {
+    if (relatedPool.length >= 3) break;
+    if (p.id !== id && !relatedPool.includes(p)) relatedPool.push(p);
+  }
+}
+const relatedPosts = relatedPool.slice(0, 3);
 
 const ogImage = data.ogImage ?? data.heroImage ?? '/og-default.svg';
 ---
@@ -125,10 +152,16 @@ const ogImage = data.ogImage ?? data.heroImage ?? '/og-default.svg';
 
   {relatedPosts.length > 0 && (
     <section class="mx-auto max-w-[1320px] px-5 pb-24 lg:px-10" aria-labelledby="related-heading">
-      <header class="mb-6 flex items-end justify-between gap-4 border-t border-[var(--color-line)] pt-10">
-        <h2 id="related-heading" class="font-display text-2xl font-medium tracking-tight lg:text-3xl">
-          Para seguir leyendo
-        </h2>
+      <div class="related-divider" aria-hidden="true"></div>
+      <header class="mb-8 flex items-end justify-between gap-4 pt-10">
+        <div>
+          <p class="font-display text-[11px] uppercase tracking-[0.22em] text-[var(--color-accent)]">
+            Otras notas
+          </p>
+          <h2 id="related-heading" class="mt-2 font-display text-2xl font-medium tracking-tight lg:text-3xl">
+            <em class="font-serif italic text-[var(--color-accent)]">Otras</em> notas que podrían interesarte
+          </h2>
+        </div>
         <a href="/blog/" class="font-display text-sm uppercase tracking-[0.18em] text-[var(--color-ink)] ink-link">
           Ver todos →
         </a>
@@ -143,3 +176,33 @@ const ogImage = data.ogImage ?? data.heroImage ?? '/og-default.svg';
     </section>
   )}
 </BaseLayout>
+
+<style>
+  /* Editorial hand-off — a terracotta accent rule before the related-notes section.
+     Acts as the "gold" rule from the editorial print brief: thin, single, with a
+     small ornament dot that signals the section break. */
+  .related-divider {
+    height: 1px;
+    margin-top: 2.5rem;
+    background: linear-gradient(
+      to right,
+      var(--color-accent) 0%,
+      var(--color-accent) 12%,
+      var(--color-accent-soft) 12%,
+      var(--color-accent-soft) 14%,
+      var(--color-line) 14%,
+      var(--color-line) 100%
+    );
+    position: relative;
+  }
+  .related-divider::after {
+    content: "";
+    position: absolute;
+    top: -3px;
+    left: calc(12% + 14px);
+    width: 5px;
+    height: 5px;
+    border-radius: 9999px;
+    background: var(--color-accent);
+  }
+</style>

@@ -1,0 +1,124 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import resources from '../data/resources.json';
+import categories from '../data/categories.json';
+
+// Keep the categories ordering from the editorial config.
+const filteredCats = categories.filter((c) => c.name !== 'Casos');
+const grouped = filteredCats.map((c) => ({
+  ...c,
+  items: resources.filter((r) => r.category === c.name),
+}));
+const total = resources.length;
+const totalSize = resources.reduce((acc, r) => {
+  const kb = Number(r.size.replace(/[^0-9]/g, '')) || 0;
+  return acc + kb;
+}, 0);
+---
+
+<BaseLayout
+  title="Biblioteca"
+  description="Planillas, checklists y templates editables para PyMEs industriales. Recursos prácticos para estrategia, operaciones, finanzas y RR.HH."
+>
+  <section class="mx-auto max-w-[1320px] px-5 pt-12 pb-10 lg:px-10 lg:pt-20">
+    <p class="font-display text-[11px] uppercase tracking-[0.22em] text-[var(--color-accent)]">
+      Biblioteca editorial
+    </p>
+    <h1 class="mt-4 max-w-3xl font-display text-4xl font-medium leading-[1.04] tracking-tight sm:text-5xl lg:text-6xl">
+      Recursos <em class="font-serif italic text-[var(--color-accent)]">descargables</em> para llevarte a la planta.
+    </h1>
+    <p class="mt-5 max-w-2xl text-lg leading-relaxed text-[var(--color-ink-soft)]">
+      Planillas, checklists y templates editables. Los mismos que usamos en los proyectos con clientes, sin la reunión de consultoría alrededor.
+    </p>
+    <dl class="mt-10 grid grid-cols-3 gap-y-6 border-t border-[var(--color-line)] pt-8 sm:max-w-xl">
+      <div class="flex flex-col gap-1">
+        <dt class="font-display text-[11px] uppercase tracking-[0.2em] text-[var(--color-mute)]">Recursos</dt>
+        <dd class="font-display text-3xl font-medium tracking-tight">{total}</dd>
+      </div>
+      <div class="flex flex-col gap-1">
+        <dt class="font-display text-[11px] uppercase tracking-[0.2em] text-[var(--color-mute)]">Categorías</dt>
+        <dd class="font-display text-3xl font-medium tracking-tight">{filteredCats.length}</dd>
+      </div>
+      <div class="flex flex-col gap-1">
+        <dt class="font-display text-[11px] uppercase tracking-[0.2em] text-[var(--color-mute)]">Tamaño</dt>
+        <dd class="font-display text-3xl font-medium tracking-tight">
+          {(totalSize / 1024).toFixed(1)}<span class="text-base text-[var(--color-mute)]"> MB</span>
+        </dd>
+      </div>
+    </dl>
+  </section>
+
+  {grouped.map((cat) => cat.items.length > 0 && (
+    <section
+      class="mx-auto max-w-[1320px] px-5 pt-8 pb-10 lg:px-10"
+      aria-labelledby={`cat-${cat.slug}`}
+    >
+      <header class="mb-6 flex items-end justify-between gap-4 border-t border-[var(--color-line)] pt-8">
+        <div>
+          <p class="font-display text-[11px] uppercase tracking-[0.22em] text-[var(--color-mute)]">
+            {cat.items.length} {cat.items.length === 1 ? 'recurso' : 'recursos'}
+          </p>
+          <h2 id={`cat-${cat.slug}`} class="mt-1 font-display text-2xl font-medium tracking-tight lg:text-3xl">
+            {cat.name}
+          </h2>
+        </div>
+        <a href={`/blog/category/${cat.slug}/`} class="font-display text-sm uppercase tracking-[0.18em] text-[var(--color-ink)] ink-link">
+          Ver notas →
+        </a>
+      </header>
+
+      <ul class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {cat.items.map((r) => (
+          <li>
+            <article class="group flex h-full flex-col rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white shadow-[var(--shadow-paper)] transition-transform duration-[600ms] [transition-timing-function:var(--ease-editorial)] hover:-translate-y-0.5">
+              <header class="flex items-center justify-between gap-3 border-b border-[var(--color-line)] px-5 py-3">
+                <span class="inline-flex items-center gap-1.5 font-display text-[10px] uppercase tracking-[0.18em] text-[var(--color-ink)]">
+                  <span class="size-1.5 rounded-full bg-[var(--color-accent)]" aria-hidden="true"></span>
+                  {r.type}
+                </span>
+                <span class="font-mono text-[11px] uppercase tracking-widest text-[var(--color-mute)]">
+                  {r.format} · {r.size}
+                </span>
+              </header>
+              <div class="flex flex-1 flex-col gap-3 p-6">
+                <h3 class="font-display text-lg font-medium leading-snug tracking-tight text-[var(--color-ink)]">
+                  {r.title}
+                </h3>
+                <p class="text-sm leading-relaxed text-[var(--color-ink-soft)]">
+                  {r.description}
+                </p>
+              </div>
+              <footer class="border-t border-[var(--color-line)] px-5 py-4">
+                <a
+                  href={r.link}
+                  download
+                  class="inline-flex items-center gap-2 font-display text-[11px] uppercase tracking-[0.18em] text-[var(--color-ink)] ink-link"
+                  aria-label={`Descargar ${r.title} (${r.format}, ${r.size})`}
+                >
+                  Descargar {r.format}
+                  <span aria-hidden="true">↓</span>
+                </a>
+              </footer>
+            </article>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
+
+  <section class="mx-auto max-w-[1320px] px-5 py-12 lg:px-10 lg:py-16">
+    <div class="flex flex-col gap-4 rounded-[var(--radius-card)] border border-dashed border-[var(--color-line)] bg-[var(--color-paper-deep)]/50 p-6 lg:flex-row lg:items-center lg:justify-between lg:p-8">
+      <div>
+        <p class="font-display text-[11px] uppercase tracking-[0.2em] text-[var(--color-accent)]">
+          Nota editorial
+        </p>
+        <p class="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--color-ink-soft)]">
+          Recursos de muestra. Para descarga real y versiones actualizadas, contactar al equipo.
+        </p>
+      </div>
+      <a href="/contact/" class="btn-ghost whitespace-nowrap">
+        Hablar con el equipo →
+      </a>
+    </div>
+  </section>
+</BaseLayout>

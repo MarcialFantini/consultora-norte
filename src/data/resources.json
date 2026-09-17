@@ -1,0 +1,82 @@
+[
+  {
+    "slug": "tablero-kpis-minimo-viable",
+    "title": "Tablero de KPIs mínimo viable",
+    "description": "Planilla con cinco indicadores, fórmulas y tolerancias. Para PyMEs que todavía no tienen tablero de gestión.",
+    "type": "Planilla Excel",
+    "size": "245 KB",
+    "category": "Finanzas",
+    "link": "/recursos/tablero-kpis-minimo-viable.xlsx",
+    "format": "XLSX"
+  },
+  {
+    "slug": "checklist-auditoria-de-planta",
+    "title": "Checklist — Auditoría rápida de planta",
+    "description": "Veintidós puntos para revisar desperdicio, flujo y paradas. Recorrido de una mañana por línea.",
+    "type": "Checklist PDF",
+    "size": "182 KB",
+    "category": "Operaciones",
+    "link": "/recursos/checklist-auditoria-planta.pdf",
+    "format": "PDF"
+  },
+  {
+    "slug": "calculo-precio-objetivo",
+    "title": "Cálculo de precio objetivo",
+    "description": "Plantilla para pasar de costo variable a precio de lista. Considera margen, descuento e impuestos.",
+    "type": "Planilla Excel",
+    "size": "198 KB",
+    "category": "Finanzas",
+    "link": "/recursos/calculo-precio-objetivo.xlsx",
+    "format": "XLSX"
+  },
+  {
+    "slug": "diagnostico-inicial-pyme",
+    "title": "Diagnóstico inicial de PyME industrial",
+    "description": "Cuestionario de cincuenta preguntas, organizadas por área, para la primera reunión con un cliente nuevo.",
+    "type": "Template",
+    "size": "320 KB",
+    "category": "Estrategia",
+    "link": "/recursos/diagnostico-inicial-pyme.pdf",
+    "format": "PDF"
+  },
+  {
+    "slug": "politica-de-descuentos",
+    "title": "Política de descuentos — versión editable",
+    "description": "Documento base para definir topes, excepciones y aprobación. Adaptable a cualquier operación B2B.",
+    "type": "Documento",
+    "size": "164 KB",
+    "category": "Finanzas",
+    "link": "/recursos/politica-descuentos.docx",
+    "format": "DOCX"
+  },
+  {
+    "slug": "planilla-turnos-rotativos",
+    "title": "Planilla de turnos rotativos",
+    "description": "Calendario anual con cuatro esquemas de rotación. Calcula horas extras y cobertura por turno.",
+    "type": "Planilla Excel",
+    "size": "276 KB",
+    "category": "RR.HH.",
+    "link": "/recursos/planilla-turnos-rotativos.xlsx",
+    "format": "XLSX"
+  },
+  {
+    "slug": "manual-supervisor-primera-semana",
+    "title": "Manual del supervisor — primera semana",
+    "description": "Guía de seis páginas para supervisores recién ascendidos. Cubre reuniones, indicadores y reuniones 1 a 1.",
+    "type": "Documento",
+    "size": "410 KB",
+    "category": "RR.HH.",
+    "link": "/recursos/manual-supervisor-primera-semana.pdf",
+    "format": "PDF"
+  },
+  {
+    "slug": "ficha-propuesta-de-valor",
+    "title": "Ficha — Propuesta de valor en una hoja",
+    "description": "Una hoja para escribir, en cinco líneas, qué hacés, para quién y por qué te eligen. Ejemplos incluidos.",
+    "type": "Template",
+    "size": "138 KB",
+    "category": "Estrategia",
+    "link": "/recursos/ficha-propuesta-valor.pdf",
+    "format": "PDF"
+  }
+]
