@@ -200,11 +200,38 @@
   font-size: 1.075rem;
   line-height: 1.75;
 }
-.prose-editorial blockquote {
-  font-family: var(--font-display);
+
+/* Dropcap on the first paragraph — editorial signature, serif + terracotta. */
+.prose-editorial > p:first-of-type::first-letter {
+  font-family: var(--font-serif);
+  font-weight: 500;
   font-style: italic;
-  font-size: 1.35rem;
-  line-height: 1.4;
+  font-size: 3.6em;
+  line-height: 0.88;
+  float: left;
+  margin: 0.06em 0.12em -0.04em -0.02em;
+  color: var(--color-accent);
+  font-feature-settings: "ss01", "ss02", "kern";
+}
+@media (min-width: 768px) {
+  .prose-editorial > p:first-of-type::first-letter {
+    font-size: 4.6em;
+    margin: 0.08em 0.14em -0.06em -0.03em;
+  }
+}
+
+/* Pull quote — serif, italic, generous leading. Editorial print feel. */
+.prose-editorial blockquote {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.5rem;
+  line-height: 1.45;
+  letter-spacing: -0.005em;
+  color: var(--color-ink);
+}
+.prose-editorial blockquote p {
+  font-family: var(--font-serif);
 }
 
 /* ---------------------------------------------------------------------------
