@@ -1,0 +1,62 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { collectTags } from '../../../lib/tags';
+
+const allPosts = await getCollection('blog');
+const tags = collectTags(allPosts);
+const totalUsages = tags.reduce((acc, t) => acc + t.count, 0);
+---
+<BaseLayout
+  title="Tags"
+  description="Todas las etiquetas del archivo de Consultora Norte. Explorá las notas por tema, no por categoría."
+>
+  <section class="mx-auto max-w-[1320px] px-5 pt-12 pb-10 lg:px-10 lg:pt-20">
+    <nav class="mb-6 font-display text-[11px] uppercase tracking-[0.18em] text-[var(--color-mute)]" aria-label="Migas">
+      <a href="/" class="hover:text-[var(--color-ink)]">Inicio</a>
+      <span class="mx-2" aria-hidden="true">/</span>
+      <a href="/blog/" class="hover:text-[var(--color-ink)]">Blog</a>
+      <span class="mx-2" aria-hidden="true">/</span>
+      <span class="text-[var(--color-ink)]">Tags</span>
+    </nav>
+    <p class="font-display text-[11px] uppercase tracking-[0.22em] text-[var(--color-accent)]">
+      Etiquetas
+    </p>
+    <h1 class="mt-4 max-w-3xl font-display text-4xl font-medium leading-[1.04] tracking-tight sm:text-5xl lg:text-6xl">
+      Por <em class="font-serif italic text-[var(--color-accent)]">tema</em>, no por categoría.
+    </h1>
+    <p class="mt-5 max-w-2xl text-lg leading-relaxed text-[var(--color-ink-soft)]">
+      {tags.length} etiquetas activas en {totalUsages} menciones. Elegí una para ver las notas que la comparten. Las etiquetas son transversales a las cinco categorías.
+    </p>
+  </section>
+
+  {tags.length === 0 ? (
+    <section class="mx-auto max-w-[1320px] px-5 pb-24 lg:px-10">
+      <p class="rounded-[var(--radius-card)] border border-dashed border-[var(--color-line)] p-12 text-center text-[var(--color-mute)]">
+        Próximamente etiquetamos las primeras notas.
+      </p>
+    </section>
+  ) : (
+    <section class="mx-auto max-w-[1320px] px-5 pb-24 lg:px-10" aria-labelledby="tags-cloud">
+      <h2 id="tags-cloud" class="sr-only">Listado de etiquetas</h2>
+      <ul class="flex flex-wrap gap-2">
+        {tags.map((entry) => (
+          <li>
+            <a
+              href={`/blog/tag/${entry.slug}/`}
+              class="group inline-flex items-center gap-2 rounded-full border border-[var(--color-line)] bg-white px-3 py-1.5 transition-colors hover:border-[var(--color-ink)]"
+              data-tag-original={entry.tag}
+            >
+              <span class="font-display text-[11px] uppercase tracking-[0.16em] text-[var(--color-ink)]">
+                #{entry.tag}
+              </span>
+              <span class="font-mono text-[10px] uppercase tracking-widest text-[var(--color-mute)] group-hover:text-[var(--color-ink)]">
+                {entry.count}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+</BaseLayout>

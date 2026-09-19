@@ -1,6 +1,15 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* Self-hosted variable fonts via @fontsource. Importing from JS frontmatter
+   was tree-shaking the @font-face rules, so we pull them in here via
+   `@import` (CSS-first, picked up by Tailwind/Vite). Each package declares
+   `font-family: 'X Variable'` — the design tokens below reference those
+   exact names. */
+@import "@fontsource-variable/bricolage-grotesque";
+@import "@fontsource-variable/newsreader";
+@import "@fontsource-variable/jetbrains-mono";
+
 /* ---------------------------------------------------------------------------
    Design tokens — Consultora Norte
    Editorial palette: warm paper background, ink text, terracotta accent.
@@ -16,9 +25,9 @@
   --color-accent-soft: #C76140;
   --color-mark: #F1E4D6;
 
-  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Newsreader", ui-serif, Georgia, serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-display: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Newsreader Variable", ui-serif, Georgia, serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, monospace;
 
   --radius-soft: 1.25rem;
   --radius-card: 1.75rem;

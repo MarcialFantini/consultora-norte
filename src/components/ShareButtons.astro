@@ -1,0 +1,116 @@
+---
+/**
+ * ShareButtons.astro
+ *
+ * Editorial share row — Twitter (X), LinkedIn, copy-link.
+ * Pure anchor + mailto/clipboard fallback. Zero JS framework.
+ * The copy button uses a tiny inline script for clipboard + status.
+ */
+
+interface Props {
+  url: string;
+  title: string;
+  description?: string;
+}
+
+const { url, title, description = '' } = Astro.props;
+const encodedUrl = encodeURIComponent(url);
+const encodedTitle = encodeURIComponent(title);
+const encodedDescription = encodeURIComponent(description);
+
+const twitterHref = `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`;
+const linkedinHref = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
+const mailHref = `mailto:?subject=${encodedTitle}&body=${encodedDescription}%0A%0A${encodedUrl}`;
+---
+<div
+  data-share-component
+  data-share-url={url}
+  data-share-title={title}
+  class="not-prose mt-8 flex flex-wrap items-center gap-2 border-t border-[var(--color-line)] pt-6"
+>
+  <span class="font-display text-[11px] uppercase tracking-[0.18em] text-[var(--color-mute)]">
+    Compartir
+  </span>
+  <a
+    href={twitterHref}
+    target="_blank"
+    rel="noopener noreferrer"
+    class="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-line)] px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.16em] text-[var(--color-ink-soft)] transition-colors hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]"
+    aria-label="Compartir en Twitter"
+  >
+    Twitter
+  </a>
+  <a
+    href={linkedinHref}
+    target="_blank"
+    rel="noopener noreferrer"
+    class="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-line)] px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.16em] text-[var(--color-ink-soft)] transition-colors hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]"
+    aria-label="Compartir en LinkedIn"
+  >
+    LinkedIn
+  </a>
+  <a
+    href={mailHref}
+    class="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-line)] px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.16em] text-[var(--color-ink-soft)] transition-colors hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]"
+    aria-label="Compartir por correo"
+  >
+    Correo
+  </a>
+  <button
+    type="button"
+    data-share-copy
+    class="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-line)] px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.16em] text-[var(--color-ink-soft)] transition-colors hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]"
+    aria-label="Copiar enlace"
+  >
+    <span data-share-copy-label>Copiar enlace</span>
+  </button>
+  <span data-share-status class="sr-only" role="status" aria-live="polite"></span>
+</div>
+
+<script is:inline>
+  (function () {
+    var buttons = document.querySelectorAll('[data-share-copy]');
+    buttons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var root = btn.closest('[data-share-component]');
+        var url = root ? root.getAttribute('data-share-url') : '';
+        var status = root ? root.querySelector('[data-share-status]') : null;
+        var label = root ? root.querySelector('[data-share-copy-label]') : null;
+        if (!url) return;
+
+        function markCopied() {
+          if (status) status.textContent = 'Enlace copiado al portapapeles.';
+          if (label) {
+            var prev = label.textContent;
+            label.textContent = 'Copiado';
+            window.setTimeout(function () { label.textContent = prev; }, 1800);
+          }
+        }
+
+        function markFailed() {
+          if (status) status.textContent = 'No se pudo copiar el enlace.';
+        }
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(markCopied, markFailed);
+        } else {
+          // Fallback for ancient browsers.
+          var ta = document.createElement('textarea');
+          ta.value = url;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'absolute';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.select();
+          try {
+            document.execCommand('copy');
+            markCopied();
+          } catch (e) {
+            markFailed();
+          }
+          document.body.removeChild(ta);
+        }
+      });
+    });
+  })();
+</script>

@@ -1,10 +1,14 @@
 ---
-import { getCollection, render } from 'astro:content';
+import { getCollection, render, type CollectionEntry } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
-import CategoryChip from '../../components/CategoryChip.astro';
 import PostCard from '../../components/PostCard.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import ShareButtons from '../../components/ShareButtons.astro';
+import ReadingProgress from '../../components/ReadingProgress.astro';
+import Comments from '../../components/Comments.astro';
+import { tagSlug } from '../../lib/tags';
 
 export const getStaticPaths = (async () => {
   const posts = await getCollection('blog');
@@ -22,9 +26,12 @@ const allPosts = (await getCollection('blog')).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
 );
 
-// Related-posts strategy: same category first, then editorial neighbors, then any.
-// The category map mirrors how the consulting partners group these notes when
-// recommending further reading to a client.
+// Related-posts strategy — three signals, weighted:
+//  1. Same category (strongest signal, editorial grouping).
+//  2. Tag overlap — counts shared tags, case-insensitive.
+//  3. Editorial neighboring category — a curated cross-category map that
+//     mirrors how the consulting partners recommend reading to a client.
+// Posts are scored, deduplicated, and we backfill with recency if needed.
 const RELATED_CATEGORIES: Record<string, string[]> = {
   'Estrategia': ['Operaciones', 'Casos'],
   'Operaciones': ['Estrategia', 'Casos'],
@@ -33,30 +40,77 @@ const RELATED_CATEGORIES: Record<string, string[]> = {
   'Casos': ['Estrategia', 'Operaciones', 'Finanzas', 'RR.HH.'],
 };
 
-const sameCategory = allPosts.filter(
-  (p) => p.id !== id && p.data.category === data.category
-);
-const relatedPool = [...sameCategory];
-const neighbors = RELATED_CATEGORIES[data.category] ?? [];
-for (const neighbor of neighbors) {
-  if (relatedPool.length >= 3) break;
-  const fillers = allPosts.filter(
-    (p) => p.id !== id && p.data.category === neighbor && !relatedPool.includes(p)
-  );
-  for (const f of fillers) {
-    if (relatedPool.length >= 3) break;
-    relatedPool.push(f);
+const currentTags = new Set((data.tags ?? []).map((t) => tagSlug(t)));
+const neighborCategories = new Set(RELATED_CATEGORIES[data.category] ?? []);
+
+interface ScoredPost {
+  post: CollectionEntry<'blog'>;
+  score: number;
+}
+
+const scoredPosts: ScoredPost[] = allPosts
+  .filter((p) => p.id !== id)
+  .map((p) => {
+    let score = 0;
+    if (p.data.category === data.category) score += 8;
+    if (neighborCategories.has(p.data.category)) score += 3;
+    const overlap = (p.data.tags ?? []).filter((t) => currentTags.has(tagSlug(t))).length;
+    score += overlap * 2;
+    // Tiebreak — recency nudge so the related rail doesn't look frozen.
+    const ageMs = Date.now() - p.data.pubDate.valueOf();
+    const recencyBoost = Math.max(0, 1 - ageMs / (1000 * 60 * 60 * 24 * 180));
+    score += recencyBoost * 0.4;
+    return { post: p, score };
+  });
+
+scoredPosts.sort((a, b) => b.score - a.score);
+
+const relatedPosts: CollectionEntry<'blog'>[] = [];
+for (const entry of scoredPosts) {
+  if (relatedPosts.length >= 3) break;
+  if (entry.score > 0) relatedPosts.push(entry.post);
+}
+if (relatedPosts.length < 3) {
+  for (const entry of scoredPosts) {
+    if (relatedPosts.length >= 3) break;
+    if (!relatedPosts.some((p) => p.id === entry.post.id)) {
+      relatedPosts.push(entry.post);
+    }
   }
 }
-if (relatedPool.length < 3) {
-  for (const p of allPosts) {
-    if (relatedPool.length >= 3) break;
-    if (p.id !== id && !relatedPool.includes(p)) relatedPool.push(p);
-  }
-}
-const relatedPosts = relatedPool.slice(0, 3);
 
 const ogImage = data.ogImage ?? data.heroImage ?? '/og-default.svg';
+const canonical = new URL(`/blog/${id}/`, Astro.site ?? 'https://blog.consultoranorte.example').toString();
+
+// JSON-LD Article payload for rich-results (Google News, Discover, etc.).
+// Field names mirror the Zod schema in `src/content.config.ts`:
+//   title → headline, description, heroImage → image,
+//   pubDate → datePublished, updatedDate → dateModified, author.
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: data.title,
+  description: data.description,
+  image: new URL(ogImage, Astro.site ?? 'https://blog.consultoranorte.example').toString(),
+  datePublished: data.pubDate.toISOString(),
+  dateModified: (data.updatedDate ?? data.pubDate).toISOString(),
+  author: {
+    '@type': 'Person',
+    name: data.author,
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: 'Consultora Norte',
+    logo: {
+      '@type': 'ImageObject',
+      url: new URL('/logo.svg', Astro.site ?? 'https://blog.consultoranorte.example').toString(),
+    },
+  },
+  mainEntityOfPage: {
+    '@type': 'WebPage',
+    '@id': canonical,
+  },
+};
 ---
 
 <BaseLayout
@@ -68,13 +122,17 @@ const ogImage = data.ogImage ?? data.heroImage ?? '/og-default.svg';
   author={data.author}
   category={data.category}
 >
+  <ReadingProgress />
+
   <article class="mx-auto max-w-[1320px] px-5 pt-10 pb-12 lg:px-10 lg:pt-16">
     <nav class="mb-6 font-display text-[11px] uppercase tracking-[0.18em] text-[var(--color-mute)]" aria-label="Migas">
       <a href="/" class="hover:text-[var(--color-ink)]">Inicio</a>
       <span class="mx-2" aria-hidden="true">/</span>
       <a href="/blog/" class="hover:text-[var(--color-ink)]">Blog</a>
       <span class="mx-2" aria-hidden="true">/</span>
-      <CategoryChip category={data.category} size="sm" />
+      <a href={`/blog/category/${data.category.toLowerCase().replace(/\./g, '').replace(/\s+/g, '-')}/`} class="hover:text-[var(--color-ink)]">{data.category}</a>
+      <span class="mx-2" aria-hidden="true">/</span>
+      <span class="text-[var(--color-ink)] line-clamp-1">{data.title}</span>
     </nav>
 
     <header class="grid gap-10 lg:grid-cols-[1fr_0.7fr] lg:items-end">
@@ -123,32 +181,63 @@ const ogImage = data.ogImage ?? data.heroImage ?? '/og-default.svg';
     )}
   </article>
 
-  <section class="mx-auto max-w-[760px] px-5 pb-16 lg:pb-20">
-    <div class="prose prose-editorial max-w-none">
-      <Content />
-    </div>
-
-    {data.tags && data.tags.length > 0 && (
-      <ul class="mt-10 flex flex-wrap items-center gap-2 border-t border-[var(--color-line)] pt-6" aria-label="Tags">
-        <li class="font-display text-[11px] uppercase tracking-[0.18em] text-[var(--color-mute)]">Tags:</li>
-        {data.tags.map((tag: string) => (
-          <li class="rounded-full border border-[var(--color-line)] px-3 py-1 font-display text-[11px] uppercase tracking-[0.16em] text-[var(--color-ink-soft)]">
-            #{tag}
-          </li>
-        ))}
-      </ul>
-    )}
-
-    <div class="mt-12 flex flex-col gap-4 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper-deep)] p-6 lg:flex-row lg:items-center lg:justify-between">
+  <section class="mx-auto max-w-[1320px] px-5 pb-12 lg:px-10">
+    <div class="grid gap-10 lg:grid-cols-[1fr_280px] lg:items-start">
       <div>
-        <p class="font-display text-[11px] uppercase tracking-[0.18em] text-[var(--color-accent)]">Te gustó este artículo</p>
-        <p class="mt-1 font-display text-xl font-medium leading-tight">
-          Recibí una nota como esta cada mes.
-        </p>
+        <div id="post-body" class="prose prose-editorial max-w-[760px]">
+          <Content />
+        </div>
+
+        {data.tags && data.tags.length > 0 && (
+          <div class="mt-10 max-w-[760px] border-t border-[var(--color-line)] pt-6">
+            <ul class="flex flex-wrap items-center gap-2" aria-label="Tags">
+              <li class="font-display text-[11px] uppercase tracking-[0.18em] text-[var(--color-mute)]">Tags:</li>
+              {data.tags.map((tag: string) => (
+                <li>
+                  <a
+                    href={`/blog/tag/${tagSlug(tag)}/`}
+                    class="inline-block rounded-full border border-[var(--color-line)] px-3 py-1 font-display text-[11px] uppercase tracking-[0.16em] text-[var(--color-ink-soft)] transition-colors hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]"
+                  >
+                    #{tag}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <div class="max-w-[760px]">
+          <ShareButtons url={canonical} title={data.title} description={data.description} />
+        </div>
+
+        <div class="max-w-[760px]">
+          <div class="mt-12 flex flex-col gap-4 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper-deep)] p-6 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p class="font-display text-[11px] uppercase tracking-[0.18em] text-[var(--color-accent)]">Te gustó este artículo</p>
+              <p class="mt-1 font-display text-xl font-medium leading-tight">
+                Recibí una nota como esta cada mes.
+              </p>
+            </div>
+            <a href="/rss.xml" class="btn-ghost">Suscribirme por RSS</a>
+          </div>
+        </div>
       </div>
-      <a href="/" class="btn-ghost">Suscribirme por RSS</a>
+
+      <aside class="lg:sticky lg:top-24">
+        <TableOfContents headings={headings} />
+        <div class="mt-6 hidden lg:block rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-5">
+          <p class="font-display text-[11px] uppercase tracking-[0.22em] text-[var(--color-accent)]">Sobre el autor</p>
+          <p class="mt-2 font-display text-base font-medium text-[var(--color-ink)]">{data.author}</p>
+          <p class="mt-1 text-xs text-[var(--color-mute)]">{data.authorRole}</p>
+          <a href="/autores/" class="mt-3 inline-flex items-center gap-1 font-display text-[11px] uppercase tracking-[0.18em] text-[var(--color-ink)] ink-link">
+            Ver todos los autores →
+          </a>
+        </div>
+      </aside>
     </div>
   </section>
+
+  <Comments postId={id} postTitle={data.title} />
 
   {relatedPosts.length > 0 && (
     <section class="mx-auto max-w-[1320px] px-5 pb-24 lg:px-10" aria-labelledby="related-heading">
@@ -175,6 +264,8 @@ const ogImage = data.ogImage ?? data.heroImage ?? '/og-default.svg';
       </ul>
     </section>
   )}
+
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 </BaseLayout>
 
 <style>

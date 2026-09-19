@@ -1,0 +1,249 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { tagSlug } from '../../lib/tags';
+
+const posts = (await getCollection('blog')).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+
+// Build a client-side search index. We expose title, description, tags,
+// category and an excerpt (first 240 chars of plain body) so the island
+// can do real full-text matching without a server roundtrip.
+const searchIndex = posts.map((post) => ({
+  slug: post.id,
+  url: `/blog/${post.id}/`,
+  title: post.data.title,
+  description: post.data.description,
+  category: post.data.category,
+  categorySlug: post.data.category.toLowerCase().replace(/\./g, '').replace(/\s+/g, '-'),
+  author: post.data.author,
+  tags: (post.data.tags ?? []).map((t) => ({ label: t, slug: tagSlug(t) })),
+  pubDate: post.data.pubDate.toISOString(),
+  excerpt: (post.body ?? '')
+    .replace(/^---[\s\S]*?---/, '')
+    .replace(/[#*_>`]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 240),
+}));
+
+const totalPosts = posts.length;
+const uniqueAuthors = Array.from(new Set(posts.map((p) => p.data.author))).sort();
+---
+<BaseLayout
+  title="Buscar"
+  description="Buscá en el archivo completo de Consultora Norte por título, descripción, tag, autor o palabra clave."
+>
+  <section class="mx-auto max-w-[1320px] px-5 pt-12 pb-10 lg:px-10 lg:pt-20">
+    <nav class="mb-6 font-display text-[11px] uppercase tracking-[0.18em] text-[var(--color-mute)]" aria-label="Migas">
+      <a href="/" class="hover:text-[var(--color-ink)]">Inicio</a>
+      <span class="mx-2" aria-hidden="true">/</span>
+      <a href="/blog/" class="hover:text-[var(--color-ink)]">Blog</a>
+      <span class="mx-2" aria-hidden="true">/</span>
+      <span class="text-[var(--color-ink)]">Buscar</span>
+    </nav>
+    <p class="font-display text-[11px] uppercase tracking-[0.22em] text-[var(--color-accent)]">
+      Búsqueda
+    </p>
+    <h1 class="mt-4 max-w-3xl font-display text-4xl font-medium leading-[1.04] tracking-tight sm:text-5xl lg:text-6xl">
+      Buscá en {totalPosts} notas.
+    </h1>
+    <p class="mt-5 max-w-2xl text-lg leading-relaxed text-[var(--color-ink-soft)]">
+      La búsqueda corre en tu navegador, sobre el archivo completo. Probá con un tema, un autor o una palabra del título.
+    </p>
+  </section>
+
+  <section class="mx-auto max-w-[1320px] px-5 pb-6 lg:px-10">
+    <form
+      data-search-form
+      class="flex flex-col gap-3 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-5 shadow-[var(--shadow-paper)] lg:flex-row lg:items-center lg:gap-4 lg:p-6"
+      role="search"
+      aria-label="Buscar en el blog"
+    >
+      <label class="sr-only" for="search-input">Término de búsqueda</label>
+      <input
+        id="search-input"
+        name="q"
+        type="search"
+        autocomplete="off"
+        placeholder="capacidad instalada, propuesta de valor, OEE, etc."
+        class="ed-input flex-1 lg:!text-lg"
+      />
+      <button type="submit" class="btn-primary justify-center">Buscar</button>
+    </form>
+    <p
+      data-search-help
+      class="mt-3 text-xs leading-relaxed text-[var(--color-mute)]"
+    >
+      Probá con dos palabras para resultados más finos. Soporta acentos y mayúsculas.
+    </p>
+  </section>
+
+  <section
+    id="search-results"
+    class="mx-auto max-w-[1320px] px-5 pb-24 lg:px-10"
+    aria-live="polite"
+    aria-busy="false"
+  >
+    <p data-search-status class="font-display text-[11px] uppercase tracking-[0.18em] text-[var(--color-mute)]">
+      Escribí algo para empezar a buscar. {uniqueAuthors.length} autores firmados.
+    </p>
+    <ul data-search-list class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"></ul>
+    <p data-search-empty class="mt-12 hidden rounded-[var(--radius-card)] border border-dashed border-[var(--color-line)] p-10 text-center text-[var(--color-mute)]">
+      No encontramos notas con ese término. Probá con una palabra más corta o sin acentos.
+    </p>
+  </section>
+
+  <script id="search-index" type="application/json" set:html={JSON.stringify(searchIndex)} is:inline></script>
+
+  <script is:inline>
+    (function () {
+      var form = document.querySelector('[data-search-form]');
+      var input = document.getElementById('search-input');
+      var list = document.querySelector('[data-search-list]');
+      var status = document.querySelector('[data-search-status]');
+      var empty = document.querySelector('[data-search-empty]');
+      var section = document.getElementById('search-results');
+
+      var payloadNode = document.getElementById('search-index');
+      if (!form || !input || !list || !status || !empty || !section || !payloadNode) return;
+
+      var payloadText = payloadNode.textContent || '[]';
+      var index;
+      try {
+        index = JSON.parse(payloadText);
+      } catch (e) {
+        return;
+      }
+
+      function normalize(str) {
+        return (str || '')
+          .toString()
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '');
+      }
+
+      function score(entry, terms) {
+        var title = normalize(entry.title);
+        var description = normalize(entry.description);
+        var excerpt = normalize(entry.excerpt);
+        var tags = entry.tags.map(function (t) { return normalize(t.label); }).join(' ');
+        var category = normalize(entry.category);
+        var author = normalize(entry.author);
+
+        var total = 0;
+        var allHit = terms.every(function (term) {
+          var hits = 0;
+          if (title.indexOf(term) !== -1) hits += 8;
+          if (description.indexOf(term) !== -1) hits += 4;
+          if (tags.indexOf(term) !== -1) hits += 3;
+          if (excerpt.indexOf(term) !== -1) hits += 2;
+          if (category.indexOf(term) !== -1) hits += 1;
+          if (author.indexOf(term) !== -1) hits += 5;
+          if (hits > 0) {
+            total += hits;
+            return true;
+          }
+          return false;
+        });
+        return allHit ? total : 0;
+      }
+
+      function escape(s) {
+        return String(s == null ? '' : s)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      function dateFmt(iso) {
+        try {
+          return new Date(iso).toLocaleDateString('es-AR', {
+            day: '2-digit', month: 'long', year: 'numeric'
+          });
+        } catch (e) { return ''; }
+      }
+
+      function render(results) {
+        list.innerHTML = '';
+        if (!results.length) {
+          empty.classList.remove('hidden');
+          return;
+        }
+        empty.classList.add('hidden');
+        var html = results.map(function (r) {
+          var tags = r.tags.map(function (t) {
+            return '<a href="/blog/tag/' + escape(t.slug) + '/" class="inline-block rounded-full border border-[var(--color-line)] px-2.5 py-0.5 font-display text-[10px] uppercase tracking-[0.16em] text-[var(--color-ink-soft)] transition-colors hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]">#' + escape(t.label) + '</a>';
+          }).join('');
+          return [
+            '<li>',
+            '  <a href="' + escape(r.url) + '" class="group flex h-full flex-col gap-3 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6 shadow-[var(--shadow-paper)] transition-all duration-[600ms] [transition-timing-function:var(--ease-editorial)] hover:-translate-y-0.5 hover:border-[var(--color-ink)]">',
+            '    <div class="flex items-center justify-between gap-2 font-display text-[10px] uppercase tracking-[0.18em] text-[var(--color-mute)]">',
+            '      <span class="rounded-full border border-[var(--color-ink)] px-2.5 py-1 text-[var(--color-ink)]">' + escape(r.category) + '</span>',
+            '      <time>' + escape(dateFmt(r.pubDate)) + '</time>',
+            '    </div>',
+            '    <h3 class="font-display text-xl font-medium leading-snug tracking-tight text-[var(--color-ink)] group-hover:text-[var(--color-accent)]">' + escape(r.title) + '</h3>',
+            '    <p class="text-sm leading-relaxed text-[var(--color-ink-soft)]">' + escape(r.description) + '</p>',
+            '    <p class="text-xs leading-relaxed text-[var(--color-mute)]">' + escape(r.excerpt) + (r.excerpt.length >= 240 ? '…' : '') + '</p>',
+            '    <div class="mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-[var(--color-line)] pt-3">',
+            '      <span class="font-display text-[11px] uppercase tracking-[0.16em] text-[var(--color-ink)]">' + escape(r.author) + '</span>',
+            '      <div class="flex flex-wrap gap-1.5">' + tags + '</div>',
+            '    </div>',
+            '  </a>',
+            '</li>'
+          ].join('\n');
+        }).join('\n');
+        list.innerHTML = html;
+      }
+
+      function runSearch() {
+        section.setAttribute('aria-busy', 'true');
+        var raw = input.value.trim();
+        var terms = normalize(raw).split(/\s+/).filter(Boolean);
+        if (!terms.length) {
+          list.innerHTML = '';
+          empty.classList.add('hidden');
+          status.textContent = 'Escribí algo para empezar a buscar.';
+          section.setAttribute('aria-busy', 'false');
+          return;
+        }
+
+        var scored = index
+          .map(function (entry) { return { entry: entry, score: score(entry, terms) }; })
+          .filter(function (x) { return x.score > 0; })
+          .sort(function (a, b) { return b.score - a.score; });
+
+        render(scored.map(function (x) { return x.entry; }));
+        status.textContent = scored.length === 1
+          ? 'Encontramos 1 nota para "' + raw + '".'
+          : 'Encontramos ' + scored.length + ' notas para "' + raw + '".';
+        section.setAttribute('aria-busy', 'false');
+      }
+
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        runSearch();
+      });
+
+      var debounce;
+      input.addEventListener('input', function () {
+        window.clearTimeout(debounce);
+        debounce = window.setTimeout(runSearch, 220);
+      });
+
+      // Honor ?q= for shareable searches.
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var q = params.get('q');
+        if (q) {
+          input.value = q;
+          runSearch();
+        }
+      } catch (e) {}
+    })();
+  </script>
+</BaseLayout>

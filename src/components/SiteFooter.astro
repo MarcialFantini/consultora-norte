@@ -1,7 +1,6 @@
 ---
 import site from '../data/site.json';
 import categories from '../data/categories.json';
-import CategoryNav from './CategoryNav.astro';
 ---
 <footer class="mt-20 border-t border-[var(--color-line)] bg-[var(--color-ink)] text-[var(--color-paper)]">
   <div class="mx-auto grid max-w-[1320px] gap-12 px-5 py-16 lg:grid-cols-[1.4fr_1fr_1fr] lg:px-10 lg:py-24">
@@ -87,21 +86,55 @@ import CategoryNav from './CategoryNav.astro';
 
 <script is:inline>
   (function () {
+    var KEY = 'cn-newsletter';
     var form = document.getElementById('newsletter-form');
     if (!form) return;
     var status = document.getElementById('newsletter-status');
+    var input = document.getElementById('newsletter-email');
+
+    function announce(msg) {
+      if (!status) return;
+      status.textContent = msg;
+      // Keep status visible briefly, then hide for the next state.
+      status.classList.remove('sr-only');
+      window.setTimeout(function () {
+        status.classList.add('sr-only');
+      }, 4000);
+    }
+
+    function loadSubs() {
+      try {
+        var raw = localStorage.getItem(KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) { return []; }
+    }
+
     form.addEventListener('submit', function (event) {
       event.preventDefault();
-      var input = document.getElementById('newsletter-email');
       var email = input && input.value ? input.value.trim() : '';
       var ok = email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
       if (!ok) {
-        if (status) status.textContent = 'Ingresá un correo válido.';
+        announce('Ingresá un correo válido.');
         if (input) input.focus();
         return;
       }
-      if (status) status.textContent = '¡Listo! Te suscribiste (simulado).';
+      var list = loadSubs();
+      if (list.indexOf(email) === -1) list.push(email);
+      try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
+      announce('¡Listo! Te suscribiste (simulado, guardado en tu navegador).');
       form.reset();
     });
+
+    // If the user already subscribed from this device, don't ask again.
+    try {
+      var subs = loadSubs();
+      if (subs.length > 0 && input) {
+        var banner = document.createElement('p');
+        banner.className = 'font-display text-[11px] uppercase tracking-[0.18em] text-[var(--color-accent-soft)]';
+        banner.setAttribute('aria-live', 'polite');
+        banner.textContent = 'Ya estás suscripto desde este navegador. ¡Gracias!';
+        form.parentNode && form.parentNode.insertBefore(banner, form);
+      }
+    } catch (e) {}
   })();
 </script>

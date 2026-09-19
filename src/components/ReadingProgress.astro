@@ -1,0 +1,56 @@
+---
+/**
+ * ReadingProgress.astro
+ *
+ * Fixed-position bar that tracks scroll through the post body.
+ * Pure CSS + tiny inline script. Respects prefers-reduced-motion.
+ *
+ * Usage:
+ *   import ReadingProgress from '../components/ReadingProgress.astro';
+ *   <ReadingProgress />
+ *
+ * The component reads window.scrollY and clamps it against the offset
+ * top/bottom of the post body element. We expose the element id
+ * "post-body" as a contract so authors can target their own wrappers.
+ */
+---
+<div
+  id="reading-progress"
+  class="fixed inset-x-0 top-0 z-50 h-[3px] origin-left scale-x-0 bg-[var(--color-accent)] transition-transform duration-150 ease-linear motion-reduce:hidden"
+  aria-hidden="true"
+></div>
+
+<script is:inline>
+  (function () {
+    var bar = document.getElementById('reading-progress');
+    var body = document.getElementById('post-body');
+    if (!bar || !body) return;
+
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) return;
+
+    var ticking = false;
+
+    function update() {
+      var rect = body.getBoundingClientRect();
+      var viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+      var total = rect.height - viewportHeight;
+      // Stop counting once the body has fully scrolled past the viewport.
+      var raw = total > 0 ? -rect.top / total : 0;
+      var progress = Math.min(1, Math.max(0, raw));
+      bar.style.transform = 'scaleX(' + progress + ')';
+      ticking = false;
+    }
+
+    function onScroll() {
+      if (!ticking) {
+        window.requestAnimationFrame(update);
+        ticking = true;
+      }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    update();
+  })();
+</script>

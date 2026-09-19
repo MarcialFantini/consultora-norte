@@ -2,15 +2,18 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostCard from '../../components/PostCard.astro';
-import CategoryChip from '../../components/CategoryChip.astro';
 import categories from '../../data/categories.json';
 
 const PAGE_SIZE = 6;
 const allPosts = (await getCollection('blog')).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
 );
-const posts = allPosts.slice(0, PAGE_SIZE);
 const total = allPosts.length;
+const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+const posts = allPosts.slice(0, PAGE_SIZE);
+const featuredSlot = posts[0] ?? null;
+const restPosts = posts.slice(1);
+const lastIndexOnThisPage = Math.min(PAGE_SIZE, total);
 const hasNextPage = total > PAGE_SIZE;
 ---
 <BaseLayout
@@ -48,8 +51,26 @@ const hasNextPage = total > PAGE_SIZE;
       </p>
     ) : (
       <>
+        {featuredSlot && (
+          <div class="mb-12 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+            <PostCard post={featuredSlot} variant="feature" />
+            <div class="flex flex-col justify-center gap-3 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6">
+              <p class="font-display text-[11px] uppercase tracking-[0.22em] text-[var(--color-accent)]">Lo más reciente</p>
+              <p class="font-display text-2xl font-medium leading-tight tracking-tight lg:text-3xl">
+                {featuredSlot.data.title}
+              </p>
+              <p class="text-sm leading-relaxed text-[var(--color-ink-soft)]">
+                {featuredSlot.data.description}
+              </p>
+              <a href={`/blog/${featuredSlot.id}/`} class="mt-2 inline-flex items-center gap-2 font-display text-[11px] uppercase tracking-[0.18em] text-[var(--color-ink)] ink-link">
+                Leer la nota →
+              </a>
+            </div>
+          </div>
+        )}
+
         <ul class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {posts.map((post) => (
+          {restPosts.map((post) => (
             <li>
               <PostCard post={post} />
             </li>
@@ -58,7 +79,7 @@ const hasNextPage = total > PAGE_SIZE;
 
         <nav class="mt-12 flex items-center justify-between gap-4 border-t border-[var(--color-line)] pt-6" aria-label="Paginación">
           <span class="font-display text-[11px] uppercase tracking-[0.18em] text-[var(--color-mute)]">
-            Página 1 de 2
+            Página 1 de {totalPages} · Notas 1–{lastIndexOnThisPage} de {total}
           </span>
           {hasNextPage && (
             <a href="/blog/page/2/" class="btn-ghost">

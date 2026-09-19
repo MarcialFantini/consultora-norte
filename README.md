@@ -1,6 +1,6 @@
 # Consultora Norte — Blog
 
-> Demo build: blog corporativo para una consultora PyME argentina. 11 notas seed en 5 categorías, RSS, sitemap, SEO por post, layout editorial responsive.
+> Demo build: blog corporativo para una consultora PyME argentina. 26 notas seed en 5 categorías, RSS, sitemap, SEO por post, layout editorial responsive.
 
 ---
 
@@ -21,7 +21,7 @@ Blog estático generado con **Astro 7 + Content Collections + Tailwind CSS v4**.
 - **SEO por post** generado desde un componente compartido (`<SEO/>`): title único, description, canonical, OG type/article, OG image, Twitter card, article meta (`published_time`, `author`, `section`).
 - **RSS feed** nativo en `/rss.xml` con `@astrojs/rss`, ordenado por `pubDate` y con stylesheet XSL para que el feed se vea elegante cuando alguien lo abre en el navegador.
 - **Sitemap** automático con `@astrojs/sitemap` en `/sitemap-index.xml` con `changefreq=weekly` y `priority=0.7`.
-- **Paginación** real en `/blog/page/[page].astro` (PAGE_SIZE=6). 11 posts → 2 páginas.
+- **Paginación** real en `/blog/page/[page].astro` (PAGE_SIZE=6). 26 posts → 5 páginas.
 - **Filtrado por categoría** en `/blog/category/[categoria]/` con índice de categorías en `/blog/category/`.
 - **Sin runtime JS** para la mayoría del sitio. Solo formularios (`/contact/`, newsletter del footer) usan ~1KB de script inline — no hace falta React ni Preact islands.
 
@@ -38,7 +38,7 @@ Blog estático generado con **Astro 7 + Content Collections + Tailwind CSS v4**.
 
 ### Sistema editorial
 
-- **Tipografía:** `Bricolage Grotesque` (display/sans) + `Newsreader` (serif/prose) + `JetBrains Mono` (números y metadata). Cargadas vía Google Fonts con `font-display: swap`.
+- **Tipografía:** `Bricolage Grotesque` (display/sans) + `Newsreader` (serif/prose) + `JetBrains Mono` (números y metadata). Cargadas vía `@fontsource-variable/*` auto-hospedado, sin requests a Google Fonts (`font-display: swap`).
 - **Paleta:** `paper #FBF7F0` (fondo), `ink #15171A` (texto), `accent #A8421F` (terracotta), `mute #5C5852`, `line #E5DFD0`. Contraste mínimo 13:1.
 - **Layout family:** editorial Split/Bento — hero con featured destacado, grid de recientes, índice de categorías, posts relacionados en individuales.
 - **Imágenes:** ilustraciones SVG originales por categoría, escalan a cualquier viewport sin pérdida y pesan ~1KB cada una.
@@ -50,6 +50,7 @@ Blog estático generado con **Astro 7 + Content Collections + Tailwind CSS v4**.
 - `src/data/site.json` — metadata del sitio y redes sociales.
 - `src/data/authors.json` — 3 socios ficticios con avatar SVG.
 - `src/data/categories.json` — 5 categorías con slug, descripción y tono.
+- `src/data/resources.json` — 8 recursos descargables (planillas, checklists y templates) asociados a las notas.
 
 ## Cómo correrlo
 
@@ -70,20 +71,28 @@ Una vez generado `dist/`, se puede desplegar en cualquier hosting estático (Net
 src/
 ├── content.config.ts          # schema Zod para la colección blog
 ├── styles/global.css          # design tokens + componentes + prose editorial
-├── data/                       # JSON simulados (sitio, autores, categorías)
-├── content/blog/              # 11 posts markdown con frontmatter
+├── data/                       # JSON simulados (sitio, autores, categorías, recursos)
+├── content/blog/              # 26 posts markdown con frontmatter
 ├── components/                 # SEO, Header, Footer, PostCard, CategoryChip, etc.
 ├── layouts/BaseLayout.astro   # shell del documento
 └── pages/
     ├── index.astro             # landing
     ├── about.astro
+    ├── biblioteca.astro        # índice de recursos descargables
     ├── contact.astro
     ├── 404.astro
     ├── rss.xml.js              # endpoint del feed
+    ├── autores/
+    │   ├── index.astro         # índice de socios
+    │   └── [slug].astro        # perfil por socio + sus notas
     └── blog/
         ├── index.astro              # página 1 del archivo
         ├── [slug].astro             # post individual
+        ├── buscar.astro             # buscador client-side del archivo
         ├── page/[page].astro        # paginación (2, 3, ...)
+        ├── tag/
+        │   ├── index.astro          # índice de tags
+        │   └── [tag].astro          # posts por tag
         └── category/
             ├── index.astro          # índice de categorías
             └── [categoria].astro    # posts por categoría
